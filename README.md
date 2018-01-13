@@ -909,3 +909,218 @@ describe("test asynchonous ", function() {
 * [jasmine 中文指南](https://yq.aliyun.com/articles/53426)
 * [jasmine 入门（结合示例讲解）](https://www.cnblogs.com/laixiangran/p/5060922.html)
 * [jasmine 官方文档](https://jasmine.github.io/api/2.8/global)
+
+# Karma
+
+## 环境搭建
+
+**Jasmine 做单元测试，Karma 自动化完成单元测试**
+
+* 使用 node 安装，使用 npm 或者 yarn 安装
+  `npm install karma --save-dev` 或者 `yarn add karma`
+* 执行 `karma init` 初始化 karma 的配置信息 `karma.conf.js`
+* 执行 `yarn add jasmine-core` 和 `yarn add requirejs`，安装对应的 jsamine 和 requirejs
+* 执行 `karma start` 就可以将项目跑起来
+* 代码测试的覆盖率 `yarn add karma-coverage`，配置好对应信息。启动之后会生成对应的 html 文件，打开就是代码测试覆盖率的详细信息。
+
+```
+module.exports = function(config) {
+  config.set({
+    // 基础路径，用在files，exclude属性上
+    "basePath": "./",
+
+    // 测试框架
+    // 可用的框架: https://npmjs.org/browse/keyword/karma-adapter
+    "frameworks": ["jasmine", "requirejs"],
+
+    // 需要加载到浏览器的文件列表
+    // {pattern: 'src/**/*', included: false}
+    // false 表示初始化的时候不会使用 script 标签直接将相关 js 引入到浏览器，需要自己写代码加载
+    "files": [
+      "lib/angular-1.4.6/angular.js",
+      "lib/angular-1.4.6/angular-mocks.js",
+      "lib/require-2.1.11/require.js",
+      "test-main.js",
+      "src/**/*.js",
+      "test/**/*.spec.js"
+    ],
+
+    // 排除的文件列表
+    "exclude": [],
+
+    // 在浏览器使用之前处理匹配的文件
+    // 可用的预处理: https://npmjs.org/browse/keyword/karma-preprocessor
+    "preprocessors": {
+      "src/**/*.js": ["coverage"]
+    },
+
+    // 覆盖率报告器配置
+    "coverageReporter": {
+      "type": "html",
+      "dir": "coverage"
+    },
+
+    // 使用测试结果报告者
+    // 可能的值: 'dots', 'progress'
+    // 可用的报告者: https://npmjs.org/browse/keyword/karma-reporter
+    "reporters": ["progress", "coverage"],
+
+    // 服务端口号
+    "port": 9876,
+
+    // 启用或禁用输出报告或者日志中的颜色
+    "colors": true,
+
+    // 日志等级
+    // config.LOG_DISABLE 不输出信息
+    // config.LOG_ERROR 只输出错误信息
+    // config.LOG_WARN 只输出警告信息
+    // config.LOG_INFO 输出全部信息
+    // config.LOG_DEBUG 输出调试信息
+    "logLevel": config.LOG_INFO,
+
+    // 启用或禁用自动检测文件变化进行测试
+    "autoWatch": true,
+
+    // 测试启动的浏览器
+    // 可用的浏览器: https://npmjs.org/browse/keyword/karma-launcher
+    "browsers": ["Chrome"],
+
+    // 开启或禁用持续集成模式
+    // 设置为true, Karma将打开浏览器，执行测试并最后退出
+    "singleRun": true,
+
+    // 并发级别
+    // 启动的浏览器数
+    "concurrency": Infinity
+  });
+};
+```
+
+# angularjs 配合 karma 进行单元测试
+
+## mock
+
+> 在开始写测试之前，我们需要理解测试的一个核心特性：模拟。模拟允许我们在受控环境下定义模拟对象来模仿真实对象的行为。AngularJS 提供了自己的模拟库：angular-mocks，位于 angular-mock.js 文件中，因此如果要在单元测试中建立模拟对象，就必须确保在 Karma 配置中，即 test/karma.conf.js 文件的 file 数组中包含了 angular-mock.js。
+
+## ng-mock
+
+### angular.mock.module
+
+此方法非常方便调用，因为 angular.mock.module 函数被发布在全局作用域的 window 接口上了。
+
+module 是用来配置 inject 方法注入的模块信息,参数可以是字符串,函数,对象,它一般用在 beforeEach 方法里,因为这个可以确保在执行测试任务的时候,inject 方法可以获取到模块配置。
+
+### angular.mock.inject
+
+inject 函数也是在 window 对象上的，为的是全局访问，因此可以直接调用 inject。
+
+inject 是用来注入上面配置好的 ng 模块,方便在 it 的测试函数里调用。
+
+```
+describe("test controller demo1", function() {
+  var angular = window.angular;
+  var module = angular.mock.module;
+  var inject = angular.mock.inject;
+  var _scope, _controller;
+  beforeEach(function() {
+    module("demo1");
+    inject([
+      "$controller",
+      "$rootScope",
+      function($controller, $rootScope) {
+        _scope = $rootScope.$new();
+        _controller = $controller;
+      }
+    ]);
+  });
+
+  it("demo1Controller", function() {
+    _controller("demo1Controller", { "$scope": _scope });
+    expect(_scope.name).toEqual("demo1");
+  });
+  it("demo2Controller", function() {
+    _controller("demo2Controller", { "$scope": _scope });
+    expect(_scope.name).toEqual("demo2");
+  });
+});
+```
+
+### $httpBackend
+
+angualr 内置了 $httpBackend 模拟库，这样我们可以在应用中模拟任何外部的 XHR 请求，避免在测试中创建昂贵的$http 请求。
+
+```
+// controller
+var angular = window.angular;
+var app = angular.module("Application", []);
+var module = angular.mock.module;
+var inject = angular.mock.inject;
+app.controller("MainCtrl", function($scope, $http) {
+  $http.get("Users/users.json").success(function(data) {
+    $scope.users = data;
+  });
+  $scope.text = "Hello World!";
+});
+
+// spec
+describe("MainCtrl", function() {
+  var scope, httpBackend;
+  beforeEach(module("Application"));
+  beforeEach(
+    inject([
+      "$rootScope",
+      "$controller",
+      "$httpBackend",
+      function($rootScope, $controller, $httpBackend) {
+        httpBackend = $httpBackend;
+        httpBackend.when("GET", "Users/users.json").respond([
+          {
+            "id": 1,
+            "name": "Bob"
+          },
+          {
+            "id": 2,
+            "name": "Jane"
+          }
+        ]);
+        scope = $rootScope.$new();
+        $controller("MainCtrl", { "$scope": scope });
+      }
+    ])
+  );
+  it("should have variable text = \"Hello World!\"", function() {
+    expect(scope.text).toBe("Hello World!");
+  });
+  it("should fetch list of users", function() {
+    httpBackend.flush();
+    expect(scope.users.length).toBe(2);
+    expect(scope.users[0].name).toBe("Bob");
+  });
+});
+```
+
+#### when
+
+`when(method, url, [data], [headers]);`新建一个后端定义
+
+#### expect
+
+`expect(method, url, [data], [headers]);`新建一个请求期望
+
+* method: 表示 http 方法注意都需要是大写(GET, PUT…)。
+* url: 请求的 url 可以为正则或者字符串。
+* data: 请求时带的参数。
+* headers: 请求时设置的 header。
+* when 和 expect 都会返回一个带 respond 方法的对象。respond 方法有 3 个参数 。status，data，headers 通过设置这 3 个参数就可以伪造返回的响应数据了。
+* $httpBackend.when 与 $httpBackend.expect 的区别在于: $httpBackend.expect 的伪后台只能被调用一次(调用一次后会被清除)，第二次调用就会报错。
+
+**快捷方法: when 和 expect 都有对应的快捷方法 whenGET, whenPOST,whenHEAD, whenJSONP, whenDELETE, whenPUT; expect 也一样**
+
+#### resetExpectations
+
+移除所有的 expect 而对 when 没有影响
+
+#### flush
+
+刷新一次，模拟后端返回请求，在调用这个命令之前，success 中的回调函数不会被执行

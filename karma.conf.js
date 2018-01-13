@@ -65,7 +65,7 @@ module.exports = function(config) {
 
     // 开启或禁用持续集成模式
     // 设置为true, Karma将打开浏览器，执行测试并最后退出
-    "singleRun": true,
+    "singleRun": false,
 
     // 并发级别
     // 启动的浏览器数
