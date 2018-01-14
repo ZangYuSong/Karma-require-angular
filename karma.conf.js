@@ -19,7 +19,7 @@ module.exports = function(config) {
       "lib/require-2.1.11/require.js",
       "test-main.js",
       "src/**/*.js",
-      "test/**/*.spec.js"
+      "test/unit/**/*.spec.js"
     ],
 
     // 排除的文件列表
