@@ -4,7 +4,6 @@
 
 > Karma has primarily been designed for low level (unit) testing. If it's an AngularJS app, you can
 > use Karma with karma-ng-scenario plugin, however we recommend Protractor for high level testing.
-
 > Karma 侧重于单元测试（也可以做端对端测试，只是远没有 Protractor 好用，上面的文字就是摘自 Karma 官网）， Protractor 侧重于端对端测试。
 
 ## Karma
@@ -20,7 +19,7 @@
 * 执行 `karma start` 就可以将项目跑起来
 * 代码测试的覆盖率 `yarn add karma-coverage`，配置好对应信息。启动之后会生成对应的 html 文件，打开就是代码测试覆盖率的详细信息。
 
-```
+``` js
 module.exports = function(config) {
   config.set({
     // 基础路径，用在files，exclude属性上
@@ -94,7 +93,7 @@ module.exports = function(config) {
 };
 ```
 
-## angularjs 配合 karma 进行单元测试
+## angularJS 配合 karma 进行单元测试
 
 ### mock
 
@@ -114,7 +113,7 @@ inject 函数也是在 window 对象上的，为的是全局访问，因此可�
 
 inject 是用来注入上面配置好的 ng 模块,方便在 it 的测试函数里调用。
 
-```
+``` js
 describe("test controller demo1", function() {
   var angular = window.angular;
   var module = angular.mock.module;
@@ -147,7 +146,7 @@ describe("test controller demo1", function() {
 
 angualr 内置了 \$httpBackend 模拟库，这样我们可以在应用中模拟任何外部的 XHR 请求，避免在测试中创建昂贵的 \$http 请求。
 
-```
+``` js
 // controller
 var angular = window.angular;
 var app = angular.module("Application", []);
@@ -238,12 +237,12 @@ describe("MainCtrl", function() {
 
 ### expect：断言表达式
 
-1. 每个测试文件中可以包含多个 describe
-2. 每个 describe 中可以包含多个 it
-3. 每个 it 中可以包含多个 expect
-4. describe 可嵌套使用
+1. 每个测试文件中可以包含多个 describe.
+2. 每个 describe 中可以包含多个 it.
+3. 每个 it 中可以包含多个 expect.
+4. describe 可嵌套使用.
 
-```
+``` js
 describe("Jasmine Test 1", function() {
   it("a spec with an expectation", function() {
     expect(1).toBe(1);
@@ -261,7 +260,7 @@ describe("Jasmine Test 1", function() {
 
 基本类型判断
 
-```
+``` js
 it("The 'toBe' matcher compares with ===", function() {
   var a = 12;
   var b = a;
@@ -274,7 +273,7 @@ it("The 'toBe' matcher compares with ===", function() {
 
 除了能判断基本类型（相当于"toBe"），还能判断对象
 
-```
+``` js
 it("should work for objects", function() {
   var foo = {
     "a": 12,
@@ -292,7 +291,7 @@ it("should work for objects", function() {
 
 使用正则表达式判断
 
-```
+``` js
 it("The 'toMatch' matcher is for regular expressions", function() {
   var message = "foo bar baz";
   expect(message).toMatch(/bar/);
@@ -305,7 +304,7 @@ it("The 'toMatch' matcher is for regular expressions", function() {
 
 判断是否定义
 
-```
+``` js
 it("The 'toBeDefined' matcher compares against 'undefined'", function() {
   var a = {
     "foo": "foo"
@@ -319,7 +318,7 @@ it("The 'toBeDefined' matcher compares against 'undefined'", function() {
 
 判断是否是 undefined，与"toBeDefined"相反
 
-```
+``` js
 it("The 'toBeUndefined' matcher compares against 'undefined'", function() {
   var a = {
     "foo": "foo"
@@ -333,7 +332,7 @@ it("The 'toBeUndefined' matcher compares against 'undefined'", function() {
 
 判断是否为 null
 
-```
+``` js
 it("The 'toBeNull' matcher compares against null", function() {
   var a = null;
   var foo = "foo";
@@ -347,7 +346,7 @@ it("The 'toBeNull' matcher compares against null", function() {
 
 判断是否是 true
 
-```
+``` js
 it("The 'toBeTruthy' matcher is for boolean casting testing", function() {
   var a,
     foo = "foo";
@@ -361,7 +360,7 @@ it("The 'toBeTruthy' matcher is for boolean casting testing", function() {
 
 判断是否是 false
 
-```
+``` js
 it("The 'toBeFalsy' matcher is for boolean casting testing", function() {
   var a,
     foo = "foo";
@@ -375,7 +374,7 @@ it("The 'toBeFalsy' matcher is for boolean casting testing", function() {
 
 判断数组是否包含（可判断基本类型和对象）
 
-```
+``` js
 it("The 'toContain' matcher is for finding an item in an Array", function() {
   var a = ["foo", "bar", "baz"];
   var b = [{ "foo": "foo", "bar": "bar" }, { "baz": "baz", "bar": "bar" }];
@@ -390,7 +389,7 @@ it("The 'toContain' matcher is for finding an item in an Array", function() {
 
 判断值类型的大小，结果若小则为 True（也可以判断字符及字符串，以 ascii 码的大小为判断依据）
 
-```
+``` js
 it("The 'toBeLessThan' matcher is for mathematical comparisons", function() {
   var pi = 3.1415926,
     e = 2.78;
@@ -404,8 +403,8 @@ it("The 'toBeLessThan' matcher is for mathematical comparisons", function() {
 #### toBeGreaterThan
 
 判断值类型的大小，结果若大则为 True，与 toBeLessThan 相反（也可以判断字符及字符串，以 ascii 码的大小为判断依据）
-
-```
+ 
+``` js
 it("The 'toBeGreaterThan' matcher is for mathematical comparisons", function() {
   var pi = 3.1415926,
     e = 2.78;
@@ -420,7 +419,7 @@ it("The 'toBeGreaterThan' matcher is for mathematical comparisons", function() {
 
 判断数字是否相似（第二个参数为小数精度，默认为 2 位）
 
-```
+``` js
 it("The 'toBeCloseTo' matcher is for precision math comparison", function() {
   var a = 1.1;
   var b = 1.5;
@@ -436,7 +435,7 @@ it("The 'toBeCloseTo' matcher is for precision math comparison", function() {
 
 判断是否抛出异常
 
-```
+``` js
 it("The 'toBeCloseTo' matcher is for precision math comparison", function() {
   var a = 1.1;
   var b = 1.5;
@@ -452,7 +451,7 @@ it("The 'toBeCloseTo' matcher is for precision math comparison", function() {
 
 判断是否抛出了指定的错误
 
-```
+``` js
 it("The 'toThrowError' matcher is for testing a specific thrown exception", function() {
   var foo = function() {
     throw new TypeError("foo bar baz");
@@ -468,7 +467,7 @@ it("The 'toThrowError' matcher is for testing a specific thrown exception", func
 
 使一个测试用例失败，参数为自定义的失败信息
 
-```
+``` js
 describe("A spec using the fail function", function() {
   var foo = function(x, callBack) {
     if (x) {
@@ -503,7 +502,7 @@ Jasmine 允许在执行测试集/测试用例的开始前/结束后做一些初�
 
 每个 spec（即 it）运行之后运行
 
-```
+``` js
 var globalCount;
 describe("Setup and Teardown suite 1", function() {
   var suiteGlobalCount;
@@ -557,7 +556,7 @@ describe("Setup and Teardown suite 2", function() {
 
 beforeEach-it-afterEach 之间共享变量, 每次执行完 1 条测试之后，this 都会被重置为空对象。
 
-```
+``` js
 describe("a suite", function() {
   beforeEach(function() {
     this.foo = 0;
@@ -585,7 +584,7 @@ describe("a suite", function() {
 * xit：运行到该 it 时，挂起它不执行
 * pending：将一个 spec(it) 挂起，他将被忽略
 
-```
+``` js
 xdescribe("Test xdescribe", function() {
   it("Spec 1", function() {
     expect(1).toBe(1);
@@ -615,7 +614,7 @@ describe("Test xit", function() {
 
 指定测试套件, 同一层级中出现 it, fit 两个测试 spec, 将忽略 it, 同理，同一层级出现 describe 和 fdescribe，将会忽略 desribe
 
-```
+``` js
 describe("Focused specs", function() {
   fit("is focused and will run", function() {
     expect(true).toBeTruthy();
@@ -664,7 +663,7 @@ Spy 用来追踪函数的调用历史信息（是否被调用、调用参数列�
 
 添加对某个对象下的函数执行情况的监控
 
-```
+``` js
 describe("test spy ", function() {
   var spyobj,
     bar = null;
@@ -694,7 +693,7 @@ describe("test spy ", function() {
 
 让监听的方法返回值保留下来
 
-```
+``` js
 describe("test spy ", function() {
   var spyobj,
     bar = null;
@@ -720,7 +719,7 @@ describe("test spy ", function() {
 
 指定监听的方法返回值
 
-```
+``` js
 describe("test spy ", function() {
   var spyobj,
     bar = null,
@@ -751,7 +750,7 @@ describe("test spy ", function() {
 
 伪造监听的方法返回值，通过一个自定义函数
 
-```
+``` js
 describe("test spy ", function() {
   var spyobj,
     bar = null,
@@ -784,7 +783,7 @@ describe("test spy ", function() {
 
 让监听方法执行之后返回一个错误信息,可以通过 toThrowError 来适配
 
-```
+``` js
 describe("test spy ", function() {
   var spyobj,
     bar = null;
@@ -812,7 +811,7 @@ describe("test spy ", function() {
 
 还原监听方法的返回值
 
-```
+``` js
 describe("test spy ", function() {
   var spyobj,
     bar = null;
@@ -853,7 +852,7 @@ describe("test spy ", function() {
 * .calls.first(),返回第一次调用监听函数的相关信息,除了参数还包含 this 上下文信息
 * .calls.reset(),清除监听函数调用信息,.calls.any()将返回 false
 
-```
+``` js
 describe("test spy ", function() {
   var spyobj,
     bar = null;
@@ -927,7 +926,7 @@ describe("test spy ", function() {
 
 创建一个命名的监听函数
 
-```
+``` js
 describe("test spy ", function() {
   var spyobj;
   beforeEach(function() {
@@ -948,7 +947,7 @@ describe("test spy ", function() {
 
 批量创建监听函数
 
-```
+``` js
 describe("test spy ", function() {
   var spyobj;
   beforeEach(function() {
@@ -976,7 +975,7 @@ describe("test spy ", function() {
 
 检验变量是否匹配相关类型
 
-```
+``` js
 describe("jasmine.any", function() {
   it("matches any value", function() {
     expect({}).toEqual(jasmine.any(Object));
@@ -1003,7 +1002,7 @@ describe("jasmine.any", function() {
 
 检验对象是否包含某个`key/value`
 
-```
+``` js
 describe("jasmine.objectContaining", function() {
   var foo;
   beforeEach(function() {
@@ -1053,7 +1052,7 @@ describe("jasmine.objectContaining", function() {
 * jasmine.clock().tick(), 让时钟往前走多少秒
 * jasmine.clock().mockDate(), 可以根据传入的 date 来设置当前时间
 
-```
+``` js
 describe("test jasmine.clock", function() {
   var timecallback;
   beforeEach(function() {
@@ -1097,7 +1096,7 @@ describe("test jasmine.clock", function() {
 * beforeEach, it,包装的函数传入 done 参数,只有当 done 函数执行完成之后,beforeEach, it 才算执行完成
 * jasmine.DEFAULT_TIMEOUT_INTERVAL, 默认是 5 秒之后就超时,可以修改这个超时时间
 
-```
+``` js
 describe("test asynchonous ", function() {
   var value = 0,
     originalTimeout;
@@ -1144,7 +1143,7 @@ describe("test asynchonous ", function() {
 * 执行 `webdriver-manager update` 下载 chromedriver 和 selenium Server，因为网络问题会很慢。如果下载不成功就需要手动去官网下载，然后放到指定的地方。windows 下目录在 `C:\Users\XXX\AppData\Roaming\npm\node_modules\protractor\node_modules\webdriver-manager\selenium`
 * 新建 protractor.conf.js 文件（名字随便），配置对应的信息，以下是一个简易版的其余都是默认值：
 
-```
+``` js
 exports.config = {
   "seleniumAddress": "http://localhost:8080/",
   "directConnect": true,
@@ -1159,4 +1158,45 @@ exports.config = {
 
 ## protractor API
 
-TODO
+### 定位元素
+
+> Protractor 提供一个全局函数 element，使用一个 Locator 作为参数，返回一个 ElementFinder。通过 element.all 函数可以操作多个元素。其中，ElementFinder 有一组 action 方法，例如 click()，getText()和 sendKeys()。在 Protractor 中，所有的 action 操作都是异步的。
+
+#### Locators
+
+> 一个定位器 (locator) 告诉 Protractor 如何找到一个特定的 DOM 元素，Protractor 通过全局对象 by 来定位
+
+``` js
+by.css('.myclass')
+by.id('myid')
+by.model('name')
+by.binding('bindingname')
+```
+> locator 再作为参数传给 element 函数
+
+``` js
+element(by.css('some-css'));
+element(by.model('item.name'));
+element(by.binding('item.name'));
+```
+
+#### actions
+
+> element() 函数返回一个 ElementFinder 对象。ElementFinder 对象知道如何使用locator 定位 DOM 元素，但实际还未执行定位。只有等定位元素涉及 action 方法调用时才会执行。**注：WebElement 上任何在 WebDriverJS中可执行的 action 方法在 ElementFinder 上也可执行。**
+
+``` js
+var el = element(locator);
+el.click();
+el.sendKeys('my text');
+el.clear();
+el.getAttribute('value');
+```
+
+>  既然所有的 actions 是异步的，所有 action 方法会返回一个 promise。所以，如果要获取一个元素的文本并记录，可以这样实现：
+
+``` js
+var el = element(locator);
+el.getText().then(function(text) {
+  console.log(text);
+});
+```
