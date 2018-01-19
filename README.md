@@ -1158,7 +1158,67 @@ exports.config = {
 
 ## protractor API
 
-### 定位元素
+### 浏览器 (Browser)
+
+#### angularAppRoot
+
+> Set the css selector for an element on which to find Angular. This is usually 'body' but if your ng-app is on a subsection of the page it may be a subelement.
+
+> The change will be made within WebDriver's control flow, so that commands after this method is called use the new app root. Pass nothing to get a promise that resolves to the value of the selector.
+
+> 通过一个 css 选择器来找到一个 angular 程序。通常这个指的是 body，如果你的 ng-app 在页面的一个子元素中，他就是指的这个子元素。
+
+> 这个会改变 WebDriver 的控制流，在此之后的所有方法将被新的 angular 程序调用。这个方法的返回一个 promise，resolve 传递的参数就是你写入的 css 选择器的值。
+
+#### waitForAngularEnabled
+
+> If set to false, Protractor will not wait for Angular $http and $timeout tasks to complete before interacting with the browser. This can cause flaky tests, but should be used if, for instance, your app continuously polls an API with $timeout.
+
+> Call waitForAngularEnabled() without passing a value to read the current state without changing it.
+
+> 如果设置为 false，则在与浏览器交互之前，Protractor 不会等待 Angular \$http和 \$timeout 任务完成。如果你的 app 中使用了一个长轮询的 API($tiemout)，你应该使用这个它，否则会产生古怪的测试。
+
+> 调用 waitForAngularEnabled() 方法返回一个 promise，resolve 传递的参数当前值的状态 (true/false)。
+
+#### getProcessedConfig
+
+> Get the processed configuration object that is currently being run. This will contain the specs and capabilities properties of the current runner instance.
+
+> 获取当前正在运行的已处理的配置对象。 返回一个 promise，resolve 传递一个对象，包括你的测试用例信息和运行的配置文件参数。
+
+#### forkNewDriverInstance
+
+> Fork another instance of browser for use in interactive tests.
+
+> fork 一个 browser 实例用于交叉测试
+
+* 接受三个参数，类型都是 boolen
+* 是否在创建时导航到当前网址
+* 是否在创建时应用相同的模拟模块
+* 是否复制对 baseUrl 的更改以及初始化为配置中的值的类似属性。 默认为 true
+* 返回一个 browser 对象
+
+#### restart
+
+> Restart the browser. This is done by closing this browser instance and creating a new one. A promise resolving to the new instance is returned, and if this function was called on the global browser instance then Protractor will automatically overwrite the global browser variable.
+
+> When restarting a forked browser, it is the caller's job to overwrite references to the old instance.
+
+> This function behaves slightly differently depending on if the webdriver control flow is enabled. If the control flow is enabled, the global browser object is synchronously replaced. If the control flow is disabled, the global browser is replaced asynchronously after the old driver quits.
+
+> 重新启动浏览器。 这是通过关闭这个浏览器实例并创建一个新的。 返回解析到新实例的 promise，如果在全局浏览器实例上调用此函数，则 Protractor 将自动覆盖全局浏览器变量。
+
+> 重新启动 forked browser 时，调用者的工作是覆盖对旧实例的引用。
+
+> 此功能的行为稍有不同取决于是否启用了 webdriver 控制流。 如果控制流被启用，则全局浏览器对象被同步替换。 如果控制流被禁用，则在旧驱动程序退出后，全局浏览器将被异步替换。
+
+#### restartSync
+
+> Like restart, but instead of returning a promise resolving to the new browser instance, returns the new browser instance directly. Can only be used when the control flow is enabled.
+
+> 类似于restart，但不是返回解析到新的浏览器实例的 promise，直接返回新的浏览器实例。只能在控制流程启用时使用。
+
+### 元素对象 (element)
 
 > Protractor 提供一个全局函数 element，使用一个 Locator 作为参数，返回一个 ElementFinder。通过 element.all 函数可以操作多个元素。其中，ElementFinder 有一组 action 方法，例如 click()，getText()和 sendKeys()。在 Protractor 中，所有的 action 操作都是异步的。
 
