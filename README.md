@@ -1218,6 +1218,407 @@ exports.config = {
 
 > 类似于restart，但不是返回解析到新的浏览器实例的 promise，直接返回新的浏览器实例。只能在控制流程启用时使用。
 
+#### useAllAngular2AppRoots
+
+> Instead of using a single root element, search through all angular apps available on the page when finding elements or waiting for stability. Only compatible with Angular2.
+
+> 在查找元素或等待稳定性时，不要使用单个根元素，而是搜索页面上可用的所有 angular app。 只兼容Angular2。
+
+#### waitForAngular
+
+> Instruct webdriver to wait until Angular has finished rendering and has no outstanding $http or $timeout calls before continuing. Note that Protractor automatically applies this command before every WebDriver action.
+
+> 指示 webdriver 等待 Angular 完成渲染，并且在继续之前没有未完成的$ http或$ timeout过程。 请注意，Protractor 会在每个 WebDriver 操作之前自动应用此命令。
+
+#### findElement/findElements
+
+> Waits for Angular to finish rendering before searching for elements.
+
+> 查找一个元素，在此之前等待 angular 完成渲染
+
+#### isElementPresent
+
+> Tests if an element is present on the page.
+
+> 测试页面上是否存在元素。
+
+#### addMockModule
+
+> Add a module to load before Angular whenever Protractor.get is called. Modules will be registered after existing modules already on the page, so any module registered here will override preexisting modules with the same name.
+
+> 在调用 Protractor.get 时，添加一个在Angular之前加载的模块。 模块将在页面上现有的模块之后注册，因此在这里注册的任何模块都将覆盖已有模块的同名。
+
+``` js
+// 三个参数
+// 要加载或覆盖的模块的名称
+// 加载模块的JavaScript。 请注意，这将在浏览器上下文中执行，所以它不能访问范围之外的变量。
+// 一些额外的参数将被注入，并且可以使用`arguments`对象来引用。
+browser.addMockModule('modName', function () {
+  angular.module('modName', []).value('foo', 'bar');
+});
+```
+
+#### clearMockModules
+
+> Clear the list of registered mock modules.
+
+> 清除注册模拟模块的列表。
+
+#### removeMockModule
+
+> Remove a registered mock module.
+
+> 删除注册的模拟模块。
+
+``` js
+browser.removeMockModule('modName');
+```
+
+#### getRegisteredMockModules
+
+> Get a list of the current mock modules.
+
+> 获取当前模拟模块的列表。
+
+#### get
+
+> Navigate to the given destination and loads mock modules before Angular. Assumes that the page being loaded uses Angular. If you need to access a page which does not have Angular on load, use the wrapped webdriver directly.
+
+> 假设正在加载的页面使用 Angular, 导航到给定的目的地并在 Angular 之前加载模拟模块。如果你需要访问一个没有加载Angular的页面，直接使用包装的webdriver。
+
+``` js
+// 两个参数
+// url 
+// 一个毫秒数，用来等待 angular 启动
+browser.get('https://angularjs.org/');
+expect(browser.getCurrentUrl()).toBe('https://angularjs.org/');
+```
+
+#### refresh
+
+> Makes a full reload of the current page and loads mock modules before Angular. Assumes that the page being loaded uses Angular. If you need to access a page which does not have Angular on load, use the wrapped webdriver directly.
+
+> 假设正在加载的页面使用 Angular，刷新页面重新加载并在 Angular 之前加载模拟模块。 。 如果你需要访问一个没有加载Angular的页面，直接使用包装的webdriver。
+
+#### navigate
+
+> Mixin navigation methods back into the navigation object so that they are invoked as before, i.e. driver.navigate().refresh().
+
+> 混合 navigation 方法返回给 navigation 对象，以便像以前那样调用它们。例如：driver.navigate().refresh()。
+
+#### setLocation
+
+> Browse to another page using in-page navigation.
+
+> 使用页内导航浏览到另一个页面。
+
+``` js
+browser.get('http://angular.github.io/protractor/#/tutorial');
+browser.setLocation('api');
+expect(browser.getCurrentUrl())
+    .toBe('http://angular.github.io/protractor/#/api');
+```
+
+#### getLocationAbsUrl
+
+> Deprecated, use browser.getCurrentUrl() instead.
+
+> Despite its name, this function will generally return $location.url(), though in some cases it will return $location.absUrl() instead. This function is only here for legacy users, and will probably be removed in Protractor 6.0.
+
+> 已弃用，请改用 `browser.getCurrentUrl()`
+
+> 尽管它的名字，这个函数通常会返回 `$location.url()`，但在某些情况下，它将返回`$location.absUrl()`。 此功能仅适用于旧版用户，并可能在 Protractor 6.0 中删除。
+
+#### debugger
+
+> Adds a task to the control flow to pause the test and inject helper functions into the browser, so that debugging may be done in the browser console.
+
+> This should be used under node in debug mode, i.e. with protractor debug
+
+> 向控制流添加一个任务来暂停测试并将辅助函数注入到浏览器中，以便可以在浏览器控制台中完成调试。
+
+> 这应该在调试模式下的节点下使用，即 protractor debug
+
+#### enterRepl
+
+> see browser.explore().
+
+#### explore
+
+> Beta (unstable) explore function for entering the repl loop from any point in the control flow. Use browser.explore() in your test. Does not require changes to the command line (no need to add 'debug'). Note, if you are wrapping your own instance of Protractor, you must expose globals 'browser' and 'protractor' for pause to work.
+
+> Beta (unstable) explore 函数从控制流中的任意点进入repl循环。 在你的测试中使用browser.explore()。 不需要修改命令行（不需要添加 'debug'）。 注意，如果你正在包装自己的 Protractor 实例，你必须公开全局的'browser' 和 'protractor' 来暂停工作。
+
+``` js
+element(by.id('foo')).click();
+browser.explore();
+// Execution will stop before the next click action.
+element(by.id('bar')).click();
+```
+
+#### pause
+
+> Beta (unstable) pause function for debugging webdriver tests. Use browser.pause() in your test to enter the protractor debugger from that point in the control flow. Does not require changes to the command line (no need to add 'debug'). Note, if you are wrapping your own instance of Protractor, you must expose globals 'browser' and 'protractor' for pause to work.
+
+> Beta (unstable) 暂停功能，用于调试webdriver测试。在你的测试中使用browser.pause()。 不需要修改命令行（不需要添加 'debug'）。 注意，如果你正在包装自己的 Protractor 实例，你必须公开全局的'browser' 和 'protractor' 来暂停工作。
+
+``` js
+element(by.id('foo')).click();
+browser.pause();
+// Execution will stop before the next click action.
+element(by.id('bar')).click();
+```
+
+#### controlFlowIsEnabled
+
+> Determine if the control flow is enabled.
+
+> 确定是否启用控制流。
+
+#### inherited from ExtendedWebDriver
+
+##### Appium_Commands
+
+> Various appium commands, including the commands implemented by wd. The names may be different however, and commands which are implemented already by selenium-webdriver are not re-implemented by webdriver-js-extender.
+See the [GitHub repo](https://github.com/angular/webdriver-js-extender) for details.
+
+> 各种各样的命令，包括由wd执行的命令。 但是名字可能不同，selenium-webdriver 已经实现的命令不会被 webdriver-js-extender 重新实现。
+
+#### inherited from webdriver.WebDriver
+
+##### actions
+
+> Creates a sequence of user actions using this driver. The sequence will not be scheduled for execution until webdriver.ActionSequence#perform is called.
+
+> See the selenium webdriver docs [for more details on action sequences](http://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/actions_exports_ActionSequence.html).
+
+> Mouse actions do not work on Chrome with the HTML5 Drag and Drop API due to a known [Chromedriver issue](https://bugs.chromium.org/p/chromedriver/issues/detail?id=841)
+
+> 使用此驱动程序创建一系列用户操作。 在调用webdriver.ActionSequence#perform之前，该序列不会被调度执行。
+
+> 有关动作序列的更多详细信息，请参阅 [for more details on action sequences](http://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/actions_exports_ActionSequence.html) 文档。
+
+> 鼠标操作在HTML5拖放式API上无法使用 [Chromedriver issue](https://bugs.chromium.org/p/chromedriver/issues/detail?id=841)
+
+``` js
+// Dragging one element to another.
+browser.actions().
+    mouseDown(element1).
+    mouseMove(element2).
+    mouseUp().
+    perform();
+
+// You can also use the `dragAndDrop` convenience action.
+browser.actions().
+    dragAndDrop(element1, element2).
+    perform();
+
+// Instead of specifying an element as the target, you can specify an offset
+// in pixels. This example double-clicks slightly to the right of an element.
+browser.actions().
+    mouseMove(element).
+    mouseMove({x: 50, y: 0}).
+    doubleClick().
+    perform();
+```
+
+##### touchActions
+
+> Creates a new touch sequence using this driver. The sequence will not be scheduled for execution until actions.TouchSequence#perform is called.
+
+> See the selenium webdriver docs [for more details on action sequences](http://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/actions_exports_ActionSequence.html).
+
+> 使用此驱动程序创建新的触摸序列。 序列将不会被调度执行，直到actions.TouchSequence#perform被调用。
+
+``` js
+browser.touchActions().
+    tap(element1).
+    doubleTap(element2).
+    perform();
+```
+
+#####  executeScript
+
+> Schedules a command to execute JavaScript in the context of the currently selected frame or window. The script fragment will be executed as the body of an anonymous function. If the script is provided as a function object, that function will be converted to a string for injection into the target window.
+
+> Any arguments provided in addition to the script will be included as script arguments and may be referenced using the arguments object. Arguments may be a boolean, number, string, or WebElement. Arrays and objects may also be used as script arguments as long as each item adheres to the types previously mentioned.
+
+> The script may refer to any variables accessible from the current window. Furthermore, the script will execute in the window's context, thus document may be used to refer to the current document. Any local variables will not be available once the script has finished executing, though global variables will persist.
+
+> If the script has a return value (i.e. if the script contains a return statement), then the following steps will be taken for resolving this functions return value:
+
+* For a HTML element, the value will resolve to a WebElement
+* Null and undefined return values will resolve to null
+* Booleans, numbers, and strings will resolve as is
+* Functions will resolve to their string representation
+* For arrays and objects, each member item will be converted according to the rules above
+
+> 执行一个命令，在当前选定的框架或窗口的上下文中调度执行JavaScript。脚本片段将作为匿名函数的主体执行。如果脚本是作为函数对象提供的，则该函数将被转换为一个字符串，以便注入到目标窗口中。
+
+> 除脚本之外提供的任何参数都将作为脚本参数包含在内，并可能使用参数对象进行引用。参数可能是一个布尔值，数字，字符串或WebElement。只要每个项目都符合前面提到的类型，数组和对象也可以用作脚本参数。
+
+> 该脚本可以引用从当前窗口可访问的任何变量。而且，脚本将在窗口的上下文中执行，因此可以使用文档来引用当前文档。一旦脚本执行完成，任何局部变量都将不可用，尽管全局变量将会持续。
+
+> 如果脚本具有返回值（即，如果脚本包含返回语句），则将采取以下步骤来解决此函数的返回值：
+
+* 对于HTML元素，该值将解析为WebElement
+* 空和未定义的返回值将解析为null
+* 布尔值，数字和字符串将按原样解析
+* 函数将解析为其字符串表示形式
+* 对于数组和对象，每个成员项目都将按照上面的规则进行转换
+
+``` js
+var el = element(by.module('header'));
+var tag = browser.executeScript('return arguments[0].tagName', el);
+expect(tag).toEqual('h1');
+```
+
+##### executeAsyncScript
+
+> Unlike executing synchronous JavaScript with executeScript(), scripts executed with this function must explicitly signal they are finished by invoking the provided callback. This callback will always be injected into the executed function as the last argument, and thus may be referenced with arguments[arguments.length - 1]. The following steps will be taken for resolving this functions return value against the first argument to the script's callback function:
+
+> 与使用 executeScript() 执行同步JavaScript不同，使用此函数执行的脚本必须通过调用所提供的回调来明确表示它们已完成。这个回调函数总是作为最后一个参数被注入执行函数，因此可以用arguments [arguments.length - 1]来引用。
+
+``` js
+// Example 1
+// Performing a sleep that is synchronized with the currently selected window
+var start = new Date().getTime();
+browser.executeAsyncScript(
+    'window.setTimeout(arguments[arguments.length - 1], 500);').
+    then(function() {
+      console.log(
+          'Elapsed time: ' + (new Date().getTime() - start) + ' ms');
+    });
+
+// Example 2
+// Synchronizing a test with an AJAX application:
+var button = element(by.id('compose-button'));
+button.click();
+browser.executeAsyncScript(
+    'var callback = arguments[arguments.length - 1];' +
+    'mailClient.getComposeWindowWidget().onload(callback);');
+browser.switchTo().frame('composeWidget');
+element(by.id('to')).sendKeys('dog@example.com');
+
+// Example 3
+// Injecting a XMLHttpRequest and waiting for the result.  In this example,
+// the inject script is specified with a function literal. When using this
+// format, the function is converted to a string for injection, so it should
+// not reference any symbols not defined in the scope of the page under test.
+browser.executeAsyncScript(function() {
+  var callback = arguments[arguments.length - 1];
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "/resource/data.json", true);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4) {
+      callback(xhr.responseText);
+    }
+  };
+  xhr.send('');
+}).then(function(str) {
+  console.log(JSON.parse(str)['food']);
+});
+```
+
+##### call
+
+> Schedules a command to execute a custom function within the context of webdriver's control flow.
+
+> Most webdriver actions are asynchronous, but the control flow makes sure that commands are executed in the order they were received. By running your function in the control flow, you can ensure that it is executed before/after other webdriver actions. Additionally, Protractor will wait until the control flow is empty before deeming a test finished.
+
+> 执行一个命令，在WebDriver的控制流的上下文中执行一个自定义函数。
+
+> 大多数webdriver操作是异步的，但是控制流确保命令按照接收到的顺序执行。 通过在控制流中运行你的函数，你可以确保它在其他webdriver动作之前/之后被执行。 此外，Protractor将等待，直到控制流程为空，然后认为测试完成。
+
+``` js
+var logText = function(el) {
+  return el.getText().then((text) => {
+    console.log(text);
+  });
+};
+var counter = element(by.id('counter'));
+var button = element(by.id('button'));
+// Use `browser.call()` to make sure `logText` is run before and after
+// `button.click()`
+browser.call(logText, counter);
+button.click();
+browser.call(logText, counter);
+```
+
+##### wait
+
+> Schedules a command to wait for a condition to hold or promise to be resolved.
+
+> This function blocks WebDriver's control flow, not the javascript runtime. It will only delay future webdriver commands from being executed (e.g. it will cause Protractor to wait before sending future commands to the selenium server), and only when the webdriver control flow is enabled.
+
+> This function returnes a promise, which can be used if you need to block javascript execution and not just the control flow.
+
+> 执行一个命令，等待条件保持或保证要解决。
+
+> 此功能阻止WebDriver的控制流程，而不是运行的JavaScript。它只会推迟未来的WebDriver的命令被执行（例如，在将未来的命令发送到selenium服务器之前，它将导致Protractor等待），并且只有当webdriver控制流程启用时。
+
+> 此函数返回一个 promise，如果您需要阻止JavaScript执行而不仅仅是控制流，可以使用该承诺。
+
+``` js
+var started = startTestServer();
+browser.wait(started, 5 * 1000, 'Server should start within 5 seconds');
+browser.get(getServerUrl());
+```
+
+##### sleep
+
+> Schedules a command to make the driver sleep for the given amount of time.
+
+> 执行一个命令，使驱动程序在给定的时间内睡眠。
+
+##### getPageSource
+
+> Schedules a command to retrieve the current page's source. The page source returned is a representation of the underlying DOM: do not expect it to be formatted or escaped in the same way as the response sent from the web server.
+
+> 执行命令，获取当前页的源代码。返回的页源是底层DOM的表示：不要期望它以与Web服务器发送的响应相同的格式进行格式化或转义。
+
+##### close
+
+> Schedules a command to close the current window.
+
+> 执行一个命令，关闭当前窗口。
+
+##### getCurrentUrl
+
+> Schedules a command to retrieve the URL of the current page.
+
+> 执行一个命令，获取当前页面的URL。
+
+##### getTitle
+
+> Schedules a command to retrieve the current page's title.
+
+> 执行一个命令，获取当前页面的title。
+
+##### takeScreenshot
+
+> Schedule a command to take a screenshot. The driver makes a best effort to return a screenshot of the following, in order of preference:
+
+* Entire page
+* Current window
+* Visible portion of the current frame
+* The screenshot of the entire display containing the browser
+
+> 执行一个命令，截图。 驱动程序尽可能按照首选项的顺序返回以下屏幕截图：
+
+* 整个页面
+* 当前窗口
+* 当前帧的可见部分
+* 包含浏览器的整个显示屏幕的屏幕截图
+
+##### switchTo 
+
+> Used to switch WebDriver's focus to a frame or window (e.g. an alert, an iframe, another window).
+
+> See [WebDriver's TargetLocator Docs](http://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_TargetLocator.html) for more information.
+
+> 用于切换 WebDriver 的 focus 到一个框架或窗口。（例如：alert iframe window）
+
 ### 元素对象 (element)
 
 > Protractor 提供一个全局函数 element，使用一个 Locator 作为参数，返回一个 ElementFinder。通过 element.all 函数可以操作多个元素。其中，ElementFinder 有一组 action 方法，例如 click()，getText()和 sendKeys()。在 Protractor 中，所有的 action 操作都是异步的。
