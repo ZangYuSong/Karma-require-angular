@@ -1553,7 +1553,7 @@ browser.call(logText, counter);
 
 > This function returnes a promise, which can be used if you need to block javascript execution and not just the control flow.
 
-> 执行一个命令，等待条件保持或保证要解决。
+> 执行一个命令，等待条件成立或承诺解决。
 
 > 此功能阻止WebDriver的控制流程，而不是运行的JavaScript。它只会推迟未来的WebDriver的命令被执行（例如，在将未来的命令发送到selenium服务器之前，它将导致Protractor等待），并且只有当webdriver控制流程启用时。
 
@@ -1619,45 +1619,413 @@ browser.get(getServerUrl());
 
 > 用于切换 WebDriver 的 focus 到一个框架或窗口。（例如：alert iframe window）
 
-### 元素对象 (element)
+### Locators(by)
 
-> Protractor 提供一个全局函数 element，使用一个 Locator 作为参数，返回一个 ElementFinder。通过 element.all 函数可以操作多个元素。其中，ElementFinder 有一组 action 方法，例如 click()，getText()和 sendKeys()。在 Protractor 中，所有的 action 操作都是异步的。
+> The Protractor Locators. These provide ways of finding elements in Angular applications by binding, model, etc.
 
-#### Locators
+> Protractor 定位器。 这些提供了通过绑定，模型等在Angular应用程序中查找元素的方法。
 
-> 一个定位器 (locator) 告诉 Protractor 如何找到一个特定的 DOM 元素，Protractor 通过全局对象 by 来定位
+#### addLocator
 
-``` js
-by.css('.myclass')
-by.id('myid')
-by.model('name')
-by.binding('bindingname')
+> Add a locator to this instance of ProtractorBy. This locator can then be used with element(by.locatorName(args)).
+
+> 添加一个定位器到这个 ProtractorBy 的实例。 这个定位器可以和元素一起使用 (by.locatorName(args))。
+
+``` html
+<button ng-click="doAddition()">Go!</button>
 ```
-> locator 再作为参数传给 element 函数
-
 ``` js
-element(by.css('some-css'));
-element(by.model('item.name'));
-element(by.binding('item.name'));
-```
+// Add the custom locator.
+by.addLocator('buttonTextSimple',
+    function(buttonText, opt_parentElement, opt_rootSelector) {
+  // This function will be serialized as a string and will execute in the
+  // browser. The first argument is the text for the button. The second
+  // argument is the parent element, if any.
+  var using = opt_parentElement || document,
+      buttons = using.querySelectorAll('button');
 
-#### actions
-
-> element() 函数返回一个 ElementFinder 对象。ElementFinder 对象知道如何使用locator 定位 DOM 元素，但实际还未执行定位。只有等定位元素涉及 action 方法调用时才会执行。**注：WebElement 上任何在 WebDriverJS中可执行的 action 方法在 ElementFinder 上也可执行。**
-
-``` js
-var el = element(locator);
-el.click();
-el.sendKeys('my text');
-el.clear();
-el.getAttribute('value');
-```
-
->  既然所有的 actions 是异步的，所有 action 方法会返回一个 promise。所以，如果要获取一个元素的文本并记录，可以这样实现：
-
-``` js
-var el = element(locator);
-el.getText().then(function(text) {
-  console.log(text);
+  // Return an array of buttons with the text.
+  return Array.prototype.filter.call(buttons, function(button) {
+    return button.textContent === buttonText;
+  });
 });
+
+// Use the custom locator.
+element(by.buttonTextSimple('Go!')).click();
+```
+
+#### binding
+
+> Find an element by text binding. Does a partial match, so any elements bound to variables containing the input string will be returned.
+
+> 通过文本绑定查找元素。进行部分匹配，因此返回到包含输入字符串的变量的任何元素都将返回。
+
+``` html
+<span>{{person.name}}</span>
+<span ng-bind="person.email"></span>
+```
+``` js
+var span1 = element(by.binding('person.name'));
+expect(span1.getText()).toBe('Foo');
+
+var span2 = element(by.binding('person.email'));
+expect(span2.getText()).toBe('foo@bar.com');
+
+// You can also use a substring for a partial match
+var span1alt = element(by.binding('name'));
+expect(span1alt.getText()).toBe('Foo');
+
+// This works for sites using Angular 1.2 but NOT 1.3
+var deprecatedSyntax = element(by.binding('{{person.name}}'));
+```
+
+#### exactBinding
+
+> Find an element by exact binding.
+
+> 通过精确绑定来查找元素。
+
+``` html
+<span>{{ person.name }}</span>
+<span ng-bind="person-email"></span>
+<span>{{person_phone|uppercase}}</span>
+```
+``` js
+expect(element(by.exactBinding('person.name')).isPresent()).toBe(true);
+expect(element(by.exactBinding('person-email')).isPresent()).toBe(true);
+expect(element(by.exactBinding('person')).isPresent()).toBe(false);
+expect(element(by.exactBinding('person_phone')).isPresent()).toBe(true);
+expect(element(by.exactBinding('person_phone|uppercase')).isPresent()).toBe(true);
+expect(element(by.exactBinding('phone')).isPresent()).toBe(false);
+```
+
+#### model
+
+> Find an element by ng-model expression.
+
+> 通过 ng-model 表达式查找元素。
+
+``` html
+<input type="text" ng-model="person.name">
+```
+``` js
+var input = element(by.model('person.name'));
+input.sendKeys('123');
+expect(input.getAttribute('value')).toBe('123');
+```
+
+#### buttonText
+
+> Find a button by text.
+
+> 通过文本查找按钮。
+
+``` html
+<button>Save</button>
+```
+``` js
+element(by.buttonText('Save'));
+```
+
+#### partialButtonText
+
+> Find a button by partial text.
+
+> 通过部分文本查找按钮。
+
+``` html
+<button>Save my file</button>
+```
+``` js
+element(by.partialButtonText('Save'));
+```
+
+#### repeater
+
+> Find elements inside an ng-repeat.
+
+> 在ng-repeat中查找元素。
+
+``` html
+<div ng-repeat="cat in pets">
+  <span>{{cat.name}}</span>
+  <span>{{cat.age}}</span>
+</div>
+
+<div class="book-img" ng-repeat-start="book in library">
+  <span>{{$index}}</span>
+</div>
+<div class="book-info" ng-repeat-end>
+  <h4>{{book.name}}</h4>
+  <p>{{book.blurb}}</p >
+</div>
+```
+``` js
+// Returns the DIV for the second cat.
+var secondCat = element(by.repeater('cat in pets').row(1));
+
+// Returns the SPAN for the first cat's name.
+var firstCatName = element(by.repeater('cat in pets').
+    row(0).column('cat.name'));
+
+// Returns a promise that resolves to an array of WebElements from a column
+var ages = element.all(
+    by.repeater('cat in pets').column('cat.age'));
+
+// Returns a promise that resolves to an array of WebElements containing
+// all top level elements repeated by the repeater. For 2 pets rows
+// resolves to an array of 2 elements.
+var rows = element.all(by.repeater('cat in pets'));
+
+// Returns a promise that resolves to an array of WebElements containing
+// all the elements with a binding to the book's name.
+var divs = element.all(by.repeater('book in library').column('book.name'));
+
+// Returns a promise that resolves to an array of WebElements containing
+// the DIVs for the second book.
+var bookInfo = element.all(by.repeater('book in library').row(1));
+
+// Returns the H4 for the first book's name.
+var firstBookName = element(by.repeater('book in library').
+    row(0).column('book.name'));
+
+// Returns a promise that resolves to an array of WebElements containing
+// all top level elements repeated by the repeater. For 2 books divs
+// resolves to an array of 4 elements.
+var divs = element.all(by.repeater('book in library'));
+```
+
+#### exactRepeater
+
+> Find an element by exact repeater.
+
+> 通过精确repeater找到一个元素。
+
+``` html
+<li ng-repeat="person in peopleWithRedHair"></li>
+<li ng-repeat="car in cars | orderBy:year"></li>
+```
+``` js
+expect(element(by.exactRepeater('person in peopleWithRedHair')).isPresent())
+    .toBe(true);
+expect(element(by.exactRepeater('person in people')).isPresent()).toBe(false);
+expect(element(by.exactRepeater('car in cars')).isPresent()).toBe(true);
+```
+
+#### cssContainingText
+
+> Find elements by CSS which contain a certain string.
+
+> 通过包含特定字符串的CSS查找元素。
+
+``` html
+<ul>
+  <li class="pet">Dog</li>
+  <li class="pet">Cat</li>
+</ul>
+```
+``` js
+var dog = element(by.cssContainingText('.pet', 'Dog'));
+```
+
+#### options
+
+> Find an element by ng-options expression.
+
+> 通过ng-options表达式查找元素。
+
+``` html
+<select ng-model="color" ng-options="c for c in colors">
+  <option value="0" selected="selected">red</option>
+  <option value="1">green</option>
+</select>
+```
+``` js
+var allOptions = element.all(by.options('c for c in colors'));
+expect(allOptions.count()).toEqual(2);
+var firstOption = allOptions.first();
+expect(firstOption.getText()).toEqual('red');
+```
+
+#### deepCss 
+
+> Find an element by css selector within the Shadow DOM.
+
+> 通过 css 选择器查找一个在 Shadow DOM 中的元素。
+
+> Shadow DOM它允许在文档（document）渲染时插入一棵DOM元素子树，但是这棵子树不在主DOM树中。详细信息可以查看 [神奇的Shadow DOM](http://web.jobbole.com/87088/)
+
+``` html
+<div>
+  <span id="outerspan">
+  <"shadow tree">
+    <span id="span1"></span>
+    <"shadow tree">
+      <span id="span2"></span>
+    </>
+  </>
+</div>
+```
+``` js
+var spans = element.all(by.deepCss('span'));
+expect(spans.count()).toEqual(3);
+```
+
+#### Extends webdriver.By
+
+##### className
+
+> Locates elements that have a specific class name. The returned locator is equivalent to searching for elements with the CSS selector ".clazz".
+
+> 找到具有特定类名称的元素。 返回的定位符相当于使用CSS选择器“.clazz”搜索元素。
+
+``` html
+<ul class="pet">
+  <li class="dog">Dog</li>
+  <li class="cat">Cat</li>
+</ul>
+```
+``` js
+// Returns the web element for dog
+var dog = element(by.className('dog'));
+expect(dog.getText()).toBe('Dog'
+```
+
+##### css
+
+> Locates elements using a CSS selector. For browsers that do not support CSS selectors, WebDriver implementations may return an invalid selector error. An implementation may, however, emulate the CSS selector API.See [http://www.w3.org/TR/CSS2/selector.html](http://www.w3.org/TR/CSS2/selector.html)
+
+> 使用CSS选择器定位元素。对于那些不支持CSS选择器的浏览器实现，WebDriver可能会返回一个无效的选择错误。然而，一个实现可以模拟CSS选择器API。
+
+``` html
+<ul class="pet">
+  <li class="dog">Dog</li>
+  <li class="cat">Cat</li>
+</ul>
+```
+``` js
+// Returns the web element for cat
+var cat = element(by.css('.pet .cat'));
+expect(cat.getText()).toBe('Cat');
+```
+
+##### id
+
+> Locates an element by its ID.
+
+> 通过它的ID找到一个元素。
+
+``` html
+<ul id="pet_id">
+  <li id="dog_id">Dog</li>
+  <li id="cat_id">Cat</li>
+</ul>
+```
+``` js
+// Returns the web element for dog
+var dog = element(by.id('dog_id'));
+expect(dog.getText()).toBe('Dog');
+```
+
+##### linkText
+
+> Locates link elements whose visible text matches the given string.
+
+> 定位可见文本与给定字符串匹配的链接元素。
+
+``` html
+< a href=" ">Google</ a>
+```
+``` js
+expect(element(by.linkText('Google')).getTagName()).toBe('a');
+```
+
+##### js
+
+> Locates an elements by evaluating a JavaScript expression, which may be either a function or a string. Like webdriver.WebDriver.executeScript, the expression is evaluated in the context of the page and cannot access variables from the test file.The result of this expression must be an element or list of elements.
+
+> 通过评估一个JavaScript表达式来定位一个元素，它可以是一个函数，也可以是一个字符串。 像webdriver.WebDriver.executeScript一样，表达式在页面的上下文中被计算，并且不能从测试文件访问变量。该表达式的结果必须是元素或元素列表。
+
+``` html
+<span class="small">One</span>
+<span class="medium">Two</span>
+<span class="large">Three</span>
+```
+``` js
+var wideElement = element(by.js(function() {
+  var spans = document.querySelectorAll('span');
+  for (var i = 0; i < spans.length; ++i) {
+    if (spans[i].offsetWidth > 100) {
+     return spans[i];
+    }
+  }
+}));
+expect(wideElement.getText()).toEqual('Three');
+```
+
+##### name
+
+> Locates elements whose name attribute has the given value.
+
+> 定位name属性具有给定值的元素
+
+``` html
+<ul>
+  <li name="dog_name">Dog</li>
+  <li name="cat_name">Cat</li>
+</ul>
+```
+``` js
+// Returns the web element for dog
+var dog = element(by.name('dog_name'));
+expect(dog.getText()).toBe('Dog');
+```
+
+##### partialLinkText
+
+> Locates link elements whose visible text contains the given substring.
+
+> 找到其可见文本包含给定子字符串的链接元素。
+
+``` html
+<ul>
+  <li>< a href=" ">Doge meme</ a></li>
+  <li>Cat</li>
+</ul>
+```
+``` js
+// Returns the 'a' web element for doge meme and navigate to that link
+var doge = element(by.partialLinkText('Doge'));
+doge.click();
+```
+
+##### tagName
+
+> Locates elements with a given tag name. The returned locator is equivalent to using the getElementsByTagName DOM function.
+
+> 定位具有给定标签名称的元素。 返回的定位符相当于使用getElementsByTagName DOM函数。
+
+``` html
+< a href=" ">Google</ a>
+```
+``` js
+expect(element(by.tagName('a')).getText()).toBe('Google');
+```
+
+##### xpath 
+
+> Locates elements matching a XPath selector. Care should be taken when using an XPath selector with a webdriver.WebElement as WebDriver will respect the context in the specified in the selector. For example, given the selector '//div', WebDriver will search from the document root regardless of whether the locator was used with a WebElement.
+
+> 找到匹配XPath选择器的元素。 当使用具有webdriver.WebElement的XPath选择器时应该小心，因为WebDriver将遵守选择器中指定的上下文。 例如，给定选择器 '//div'，WebDriver将从文档根中进行搜索，而不管定位符是否与WebElement一起使用。
+
+``` html
+<ul>
+  <li>< a href=" ">Doge meme</ a></li>
+  <li>Cat</li>
+</ul>
+```
+``` js
+// Returns the 'a' element for doge meme
+var li = element(by.xpath('//ul/li/a'));
+expect(li.getText()).toBe('Doge meme');
 ```
