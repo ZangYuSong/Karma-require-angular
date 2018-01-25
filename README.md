@@ -2029,3 +2029,274 @@ expect(element(by.tagName('a')).getText()).toBe('Google');
 var li = element(by.xpath('//ul/li/a'));
 expect(li.getText()).toBe('Doge meme');
 ```
+
+### 元素定位 element
+
+#### element.all(locator) ElementArrayFinder
+
+> ElementArrayFinder is used for operations on an array of elements (as opposed to a single element).
+
+> ElementArrayFinder 用于操作数组元素（而不是一个单一的元素）。
+
+> The ElementArrayFinder is used to set up a chain of conditions that identify an array of elements. In particular, you can call all(locator) and filter(filterFn) to return a new ElementArrayFinder modified by the conditions, and you can call get(index) to return a single ElementFinder at position 'index'.
+
+> ElementArrayFinder 用于设置一系列标识元素数组的条件。特别是，你可以调用 all(locator) 和 filter(filterFn) 来返回一个由条件修改的新的 ElementArrayFinder，你可以调用 get(index) 返回位于 'index' 位置的单个 ElementFinder。
+
+> Similar to jquery, ElementArrayFinder will search all branches of the DOM to find the elements that satisfy the conditions (i.e. all, filter, get). However, an ElementArrayFinder will not actually retrieve the elements until an action is called, which means it can be set up in helper files (i.e. page objects) before the page is available, and reused as the page changes.
+
+> 与 jquery 类似，ElementArrayFinder 将搜索 DOM 的所有分支以查找满足条件的元素（即all，filter，get）。然而，一个 ElementArrayFinder 实际上不会检索元素，直到一个动作被调用，这意味着它可以在页面可用之前在助手文件（即页面对象）中设置，并在页面改变时重新使用。
+
+> You can treat an ElementArrayFinder as an array of WebElements for most purposes, in particular, you may perform actions (i.e. click, getText) on them as you would an array of WebElements. The action will apply to every element identified by the ElementArrayFinder. ElementArrayFinder extends Promise, and once an action is performed on an ElementArrayFinder, the latest result can be accessed using then, and will be returned as an array of the results; the array has length equal to the length of the elements found by the ElementArrayFinder and each result represents the result of performing the action on the element. Unlike a WebElement, an ElementArrayFinder will wait for the angular app to settle before performing finds or actions.
+
+> 您可以将 ElementArrayFinder 视为大多数 WebElements 数组，特别是您可以像对待WebElements 数组一样对它们执行操作（即click，getText）。该操作将应用于由ElementArrayFinder 标识的每个元素。 ElementArrayFinder 扩展了 Promise，一旦在 ElementArrayFinder 上执行了一个动作，最后的结果就可以被访问，并作为结果数组返回。该数组的长度等于 ElementArrayFinder 找到的元素的长度，每个结果表示对元素执行操作的结果。与 WebElement 不同，ElementArrayFinder 将在执行查找或操作之前等待 Protractor 应用程序解决。
+
+``` html
+<ul class="items">
+  <li>First</li>
+  <li>Second</li>
+  <li>Third</li>
+</ul>
+```
+``` js
+element.all(by.css('.items li')).then(function(items) {
+  expect(items.length).toBe(3);
+  expect(items[0].getText()).toBe('First');
+});
+// Or using the shortcut $$() notation instead of element.all(by.css()):
+$$('.items li').then(function(items) {
+  expect(items.length).toBe(3);
+  expect(items[0].getText()).toBe('First');
+});
+```
+
+##### clone
+
+> Create a shallow copy of ElementArrayFinder.
+
+> 创建 ElementArrayFinder 的浅表副本。
+
+##### all
+
+> Calls to ElementArrayFinder may be chained to find an array of elements using the current elements in this ElementArrayFinder as the starting point. This function returns a new ElementArrayFinder which would contain the children elements found (and could also be empty).
+
+> 对 ElementArrayFinder 的调用可以链接在一起，以此 ElementArrayFinder 中的当前元素为起点来查找元素数组。 这个函数返回一个新的 ElementArrayFinder，它将包含找到的子元素（也可以是空的）。
+
+``` html
+<div id='id1' class="parent">
+  <ul>
+    <li class="foo">1a</li>
+    <li class="baz">1b</li>
+  </ul>
+</div>
+<div id='id2' class="parent">
+  <ul>
+    <li class="foo">2a</li>
+    <li class="bar">2b</li>
+  </ul>
+</div>
+```
+``` js
+let foo = element.all(by.css('.parent')).all(by.css('.foo'));
+expect(foo.getText()).toEqual(['1a', '2a']);
+let baz = element.all(by.css('.parent')).all(by.css('.baz'));
+expect(baz.getText()).toEqual(['1b']);
+let nonexistent = element.all(by.css('.parent'))
+  .all(by.css('.NONEXISTENT'));
+expect(nonexistent.getText()).toEqual(['']);
+```
+
+##### filter
+
+> Apply a filter function to each element within the ElementArrayFinder. Returns a new ElementArrayFinder with all elements that pass the filter function. The filter function receives the ElementFinder as the first argument and the index as a second arg. This does not actually retrieve the underlying list of elements, so it can be used in page objects.
+
+> 对 ElementArrayFinder 中的每个元素应用过滤器函数。 返回一个新的 ElementArrayFinder，其中包含所有传递过滤函数的元素。 过滤函数接收 ElementFinder 作为第一个参数，索引作为第二个参数。 这实际上并不检索底层的元素列表，因此可以在页面对象中使用。
+
+``` html
+<ul class="items">
+  <li class="one">First</li>
+  <li class="two">Second</li>
+  <li class="three">Third</li>
+</ul>
+```
+``` js
+element.all(by.css('.items li')).filter(function(elem, index) {
+  return elem.getText().then(function(text) {
+    return text === 'Third';
+  });
+}).first().click();
+
+```
+
+##### get
+
+> Get an element within the ElementArrayFinder by index. The index starts at 0. Negative indices are wrapped (i.e. -i means ith element from last) This does not actually retrieve the underlying element.
+
+> 通过索引获取 ElementArrayFinder 中的元素。 索引从0开始。包含负索引（即 -i 表示从上一个元素开始）这实际上并不检索基础元素。
+
+``` html
+<ul class="items">
+  <li>First</li>
+  <li>Second</li>
+  <li>Third</li>
+</ul>
+```
+``` js
+let list = element.all(by.css('.items li'));
+expect(list.get(0).getText()).toBe('First');
+expect(list.get(1).getText()).toBe('Second');
+```
+
+##### first
+
+> Get the first matching element for the ElementArrayFinder. This does not actually retrieve the underlying element.
+
+> 获取 ElementArrayFinder 的第一个匹配元素。 这实际上并不检索底层元素。
+
+##### last
+
+> Get the last matching element for the ElementArrayFinder. This does not actually retrieve the underlying element.
+
+> 获取 ElementArrayFinder 的最后一个匹配元素。 这实际上并不检索底层元素。
+
+##### \$\$
+
+> Shorthand function for finding arrays of elements by css. element.all(by.css('.abc')) is equivalent to \$\$('.abc')
+
+> 由css查找元素数组的速记函数。element.all(by.css('.abc')) 相当于 \$\$('.abc')
+
+##### count
+
+> Count the number of elements represented by the ElementArrayFinder.
+
+> 统计ElementArrayFinder表示的元素的数量。
+
+##### isPresent
+
+> Returns true if there are any elements present that match the finder.
+
+> 如果存在任何与查找器匹配的元素，则返回true。
+
+``` js
+expect($('.item').isPresent()).toBeTruthy();
+```
+
+##### locator
+
+> Returns the most relevant locator.
+
+> 返回最相关的定位器。
+
+``` js
+// returns by.css('#ID1')
+$('#ID1').locator();
+// returns by.css('#ID2')
+$('#ID1').$('#ID2').locator();
+// returns by.css('#ID1')
+$$('#ID1').filter(filterFn).get(0).click().locator();
+```
+
+##### then
+
+> Retrieve the elements represented by the ElementArrayFinder. The input function is passed to the resulting promise, which resolves to an array of ElementFinders.
+
+> 检索由 ElementArrayFinder 表示的元素。 输入函数被传递给所生成的 promise，该 promise 被分解为一个 ElementFinder 数组。
+
+##### each
+
+> Calls the input function on each ElementFinder represented by the ElementArrayFinder.
+
+> 在 ElementArrayFinder 表示的每个 ElementFinder 上调用输入函数。
+
+``` html 
+<ul class="items">
+  <li>First</li>
+  <li>Second</li>
+  <li>Third</li>
+</ul>
+```
+``` js
+element.all(by.css('.items li')).each(function(element, index) {
+  // Will print 0 First, 1 Second, 2 Third.
+  element.getText().then(function (text) {
+    console.log(index, text);
+  });
+});
+```
+
+##### map
+
+> Apply a map function to each element within the ElementArrayFinder. The callback receives the ElementFinder as the first argument and the index as a second arg.
+
+> 将一个映射函数应用于 ElementArrayFinder 中的每个元素。 该回调接收ElementFinder 作为第一个参数，索引作为第二个参数。
+
+``` html
+<ul class="items">
+  <li class="one">First</li>
+  <li class="two">Second</li>
+  <li class="three">Third</li>
+</ul>
+```
+``` js
+let items = element.all(by.css('.items li')).map(function(elm, index) {
+  return {
+    index: index,
+    text: elm.getText(),
+    class: elm.getAttribute('class')
+  };
+});
+expect(items).toEqual([
+  {index: 0, text: 'First', class: 'one'},
+  {index: 1, text: 'Second', class: 'two'},
+  {index: 2, text: 'Third', class: 'three'}
+]);
+```
+
+##### reduce
+
+> Apply a reduce function against an accumulator and every element found using the locator (from left-to-right). The reduce function has to reduce every element into a single value (the accumulator). Returns promise of the accumulator. The reduce function receives the accumulator, current ElementFinder, the index, and the entire array of ElementFinders, respectively.
+
+> 对累加器和使用定位器找到的每个元素（从左到右）应用 reduce 函数。 reduce 函数必须将每个元素都减少为一个值（累加器）。 返回累加器的承诺。 reduce 函数分别接收累加器，当前的 ElementFinder，索引和 ElementFinder 的整个数组。
+
+``` html
+<ul class="items">
+  <li class="one">First</li>
+  <li class="two">Second</li>
+  <li class="three">Third</li>
+</ul>
+```
+``` js
+let value = element.all(by.css('.items li')).reduce(function(acc, elem) {
+  return elem.getText().then(function(text) {
+    return acc + text + ' ';
+  });
+}, '');
+expect(value).toEqual('First Second Third ');
+```
+
+##### evaluate
+
+> Evaluates the input as if it were on the scope of the current underlying elements.
+
+> 评估输入，就好像它在当前基础元素的范围内一样。
+
+``` html
+<span class="foo">{{letiableInScope}}</span>
+```
+``` js
+let value = element.all(by.css('.foo')).evaluate('letiableInScope');
+// Or using the shortcut $$() notation instead of element.all(by.css()):
+let value = $$('.foo').evaluate('letiableInScope');
+```
+
+##### allowAnimations
+
+> Determine if animation is allowed on the current underlying elements.
+
+> 确定当前底层元素是否允许动画。
+
+``` js
+// Turns off ng-animate animations for all elements in the 
+element(by.css('body')).allowAnimations(false);
+// Or using the shortcut $() notation instead of element(by.css()):
+$('body').allowAnimations(false);
+```
