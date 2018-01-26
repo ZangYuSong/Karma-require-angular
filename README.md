@@ -1156,7 +1156,7 @@ exports.config = {
 * `webdriver-manager start` 启动浏览器驱动
 * `protractor protractor.conf.js` 启动测试代码，`protractor.conf.js`是你 protractor 的配置文件
 
-## protractor API
+## protractor API 5.3.0
 
 ### 浏览器 (Browser)
 
@@ -2300,3 +2300,665 @@ element(by.css('body')).allowAnimations(false);
 // Or using the shortcut $() notation instead of element(by.css()):
 $('body').allowAnimations(false);
 ```
+
+#### element(locator) ElementFinder
+
+> The ElementFinder simply represents a single element of an ElementArrayFinder (and is more like a convenience object). As a result, anything that can be done with an ElementFinder, can also be done using an ElementArrayFinder.
+
+> The ElementFinder can be treated as a WebElement for most purposes, in particular, you may perform actions (i.e. click, getText) on them as you would a WebElement. Once an action is performed on an ElementFinder, the latest result from the chain can be accessed using the then method. Unlike a WebElement, an ElementFinder will wait for angular to settle before performing finds or actions.
+
+> ElementFinder can be used to build a chain of locators that is used to find an element. An ElementFinder does not actually attempt to find the element until an action is called, which means they can be set up in helper files before the page is available.
+
+> ElementFinder 只是一个 ElementArrayFinder 的单个元素（更像是一个方便的对象）。 因此，任何可以用 ElementFinder 完成的事情，也可以使用 ElementArrayFinder 来完成。
+
+> 可以将 ElementFinder 视为大多数目的的 WebElement，特别是您可以像 WebElement 一样对它们执行操作（即单击，getText）。 一旦在一个 ElementFinder 上执行了一个动作，就可以使用 then 方法访问链中的最新结果。 与 WebElement 不同，ElementFinder 将在执行查找或操作之前等待 Protractor 解决。
+
+> ElementFinder 可用于构建用于查找元素的一系列定位器。 一个 ElementFinder 实际上并没有试图找到该元素，直到一个动作被调用，这意味着他们可以在页面可用之前设置在帮助文件中。
+
+``` html
+<span>{{person.name}}</span>
+<span ng-bind="person.email"></span>
+<input type="text" ng-model="person.name"/>
+```
+``` js
+// Find element with {{scopelet}} syntax.
+element(by.binding('person.name')).getText().then(function(name) {
+  expect(name).toBe('Foo');
+});
+// Find element with ng-bind="scopelet" syntax.
+expect(element(by.binding('person.email')).getText()).toBe('foo@bar.com');
+// Find by model.
+let input = element(by.model('person.name'));
+input.sendKeys('123');
+expect(input.getAttribute('value')).toBe('Foo123');
+```
+
+##### clone
+
+> Create a shallow copy of ElementFinder.
+
+> 创建一个 ElementFinder 的浅表副本。
+
+##### locator (See ElementArrayFinder.prototype.locator)
+
+
+##### getWebElement
+
+> Returns the WebElement represented by this ElementFinder. Throws the WebDriver error if the element doesn't exist.
+
+> 返回由此 ElementFinder 表示的 WebElement。 如果元素不存在，则会抛出 WebDriver 错误。
+
+``` html
+<div class="parent">
+  some text
+</div>
+```
+``` js
+// The following four expressions are equivalent.
+$('.parent').getWebElement();
+element(by.css('.parent')).getWebElement();
+browser.driver.findElement(by.css('.parent'));
+browser.findElement(by.css('.parent'));
+```
+
+##### all
+
+> Calls to all may be chained to find an array of elements within a parent.
+
+> 可以链式调用 all 在当前元素中查找子集元素数组。
+
+``` html
+<div class="parent">
+  <ul>
+    <li class="one">First</li>
+    <li class="two">Second</li>
+    <li class="three">Third</li>
+  </ul>
+</div>
+```
+``` js
+let items = element(by.css('.parent')).all(by.tagName('li'));
+```
+
+##### element
+
+> Calls to element may be chained to find elements within a parent.
+
+> 可以链式调用 element 在当前元素中查找子集元素数组。
+
+``` html
+<div class="parent">
+  <div class="child">
+    Child text
+    <div>{{person.phone}}</div>
+  </div>
+</div>
+```
+``` js
+// Chain 2 element calls.
+let child = element(by.css('.parent')).
+    element(by.css('.child'));
+expect(child.getText()).toBe('Child text\n555-123-4567');
+
+// Chain 3 element calls.
+let triple = element(by.css('.parent')).
+    element(by.css('.child')).
+    element(by.binding('person.phone'));
+expect(triple.getText()).toBe('555-123-4567');
+```
+
+##### \$\$ equivalent all
+
+##### isPresent
+
+> Determine whether the element is present on the page.
+
+> 确定元素是否存在于页面上。
+
+``` html
+<span>{{person.name}}</span>
+```
+``` js
+// Element exists.
+expect(element(by.binding('person.name')).isPresent()).toBe(true);
+// Element not present.
+expect(element(by.binding('notPresent')).isPresent()).toBe(false)
+```
+
+##### isElementPresent
+
+> Same as ElementFinder.isPresent(), except this checks whether the element identified by the subLocator is present, rather than the current element finder.
+
+> 和 ElementFinder.isPresent() 一样，除了检查是否存在由subLocator标识的元素，而不是当前的元素查找器。
+
+``` js
+element(by.css('#abc')).element(by.css('#def')).isPresent()
+element(by.css('#abc')).isElementPresent(by.css('#def')).
+// Or using the shortcut $() notation instead of element(by.css()):
+$('#abc').$('#def').isPresent()
+$('#abc').isElementPresent($('#def')).
+```
+
+##### \$ equivalent element
+
+##### evaluate (See ElementArrayFinder.prototype.evaluate)
+
+##### allowAnimations (See ElementArrayFinder.prototype.allowAnimations.)
+
+##### equals
+
+> Compares an element to this one for equality.
+
+> 比较两个元素是否相等。
+
+#### Inherited from webdriver.WebElement
+
+##### getDriver
+
+> Gets the parent web element of this web element.
+
+> 获取此 Web 元素的父级 Web 元素。
+
+``` html
+<ul class="pet">
+ <li class="dog">Dog</li>
+ <li class="cat">Cat</li>
+</ul>
+```
+``` js
+// Using getDriver to find the parent web element to find the cat li
+var liDog = element(by.css('.dog')).getWebElement();
+var liCat = liDog.getDriver().findElement(by.css('.cat'));
+```
+
+##### getId
+
+> Gets the WebDriver ID string representation for this web element.
+
+> 获取此 Web 元素的 WebDriver ID 字符串表示形式。
+
+``` html
+<ul class="pet">
+  <li class="dog">Dog</li>
+  <li class="cat">Cat</li>
+</ul>
+```
+``` js
+// returns the dog web element
+var dog = element(by.css('.dog')).getWebElement();
+expect(dog.getId()).not.toBe(undefined);
+```
+
+##### findElement
+
+> Use ElementFinder.prototype.element instead.See ElementFinder.prototype.element
+
+##### click 
+
+> Schedules a command to click on this element.
+
+> 执行一个命令，点击这个元素。
+
+##### sendKeys
+
+Schedules a command to type a sequence on the DOM element represented by this instance.
+
+执行一个命令，在此实例表示的 DOM 元素中键入一个序列
+
+Modifier keys (SHIFT, CONTROL, ALT, META) are stateful; once a modifier is processed in the keysequence, that key state is toggled until one of the following occurs:
+
+修改键(SHIFT, CONTROL, ALT, META)是有状态的；在 keysequence 中处理修改器后，该密钥状态将被切换到以下情况之一：
+
+* The modifier key is encountered again in the sequence. At this point the state of the key is toggled (along with the appropriate keyup/down events).
+* 修改键在序列中再次遇到。此时键的状态被切换（以及适当的 keyup/down 事件）。
+* The webdriver.Key.NULL key is encountered in the sequence. When this key is encountered, all modifier keys current in the down state are released (with accompanying keyup events). The NULL key can be used to simulate common keyboard shortcuts:
+* webdriver.Key.NULL 键在序列中遇到。遇到此键时，释放所有处于关闭状态的修饰键（伴随 keyup 事件）。NULL 键可以用来模拟常见的键盘快捷键：
+``` js
+  element.sendKeys("text was",
+                   protractor.Key.CONTROL, "a", protractor.Key.NULL,
+                   "now text is");
+  // Alternatively:
+  element.sendKeys("text was",
+                   protractor.Key.chord(protractor.Key.CONTROL, "a"),
+                   "now text is");
+```
+* The end of the keysequence is encountered. When there are no more keys to type, all depressed modifier keys are released (with accompanying keyup events).
+* 遇到 keysequence 的结尾。 当没有更多的键可以输入时，所有按下的修改键都被释放（伴随 keyup 事件）。
+
+If this element is a file input (<input type="file">), the specified key sequence should specify the path to the file to attach to the element. This is analgous to the user clicking "Browse..." and entering the path into the file select dialog.
+
+如果此元素是文件输入`<input type =“file”>`，则指定的键序列应该指定要附加到该元素的文件的路径。这对于用户点击“浏览...”并在文件选择对话框中输入路径是不利的。
+``` js
+var form = driver.findElement(By.css('form'));
+var element = form.findElement(By.css('input[type=file]'));
+element.sendKeys('/path/to/file.txt');
+form.submit();
+```
+
+For uploads to function correctly, the entered path must reference a file on the browser's machine, not the local machine running this script. When running against a remote Selenium server, a webdriver.FileDetector may be used to transparently copy files to the remote machine before attempting to upload them in the browser.
+
+为了使上传正常工作，输入的路径必须在浏览器的机器上引用一个文件，而不是运行这个脚本的本地机器。 在远程Selenium服务器上运行时，可以使用webdriver.FileDetector将文件透明地复制到远程计算机，然后尝试在浏览器中上传文件。
+
+**Note:** On browsers where native keyboard events are not supported (e.g. Firefox on OS X), key events will be synthesized. Special punctionation keys will be synthesized according to a standard QWERTY en-us keyboard layout.
+
+**注意：**在不支持本地键盘事件的浏览器上（例如OS X上的Firefox），键盘事件将被合成。 特殊功能键将根据标准的QWERTY键盘布局进行合成。
+
+##### getTagName
+
+> Gets the tag/node name of this element.
+
+> 获取当前元素的 tag/node 名称
+
+##### getCssValue
+
+> Gets the computed style of an element. If the element inherits the named style from its parent, the parent will be queried for its value. Where possible, color values will be converted to their hex representation (e.g.#00ff00 instead of rgb(0, 255, 0)).**Warning:** the value returned will be as the browser interprets it, so it may be tricky to form a proper assertion.
+
+> 获取元素的计算样式。 如果该元素从其父项继承了指定的样式，那么父项将被查询其值。 在可能的情况下，颜色值将被转换为其十六进制表示 (例如：#00ff00 代替 rgb(0, 255, 0))。**警告：**返回的值将在浏览器解释它的时候，所以形成正确的断言可能会非常棘手。
+
+``` html
+<span style='color: #000000'>{{person.name}}</span>
+```
+``` js
+expect(element(by.binding('person.name')).getCssValue('color')).toBe('#000000');
+```
+
+##### getAttribute
+
+> Schedules a command to query for the value of the given attribute of the element. Will return the current value, even if it has been modified after the page has been loaded. More exactly, this method will return the value of the given attribute, unless that attribute is not present, in which case the value of the property with the same name is returned. If neither value is set, null is returned (for example, the "value" property of a textarea element). The "style" attribute is converted as best can be to a text representation with a trailing semi-colon. The following are deemed to be "boolean" attributes and will return either "true" or null:
+
+> 执行一个命令来查询元素的给定属性的值。将返回当前值，即使在页面加载之后已被修改。更确切地说，这个方法将返回给定属性的值，除非该属性不存在，在这种情况下，返回具有相同名称的属性的值。如果两个值均未设置，则返回null（例如，textarea元素的“value”属性）。 “style”属性最好转换为带有分号的文本表示。以下内容被视为“布尔”属性，将返回“true”或null：
+
+> async, autofocus, autoplay, checked, compact, complete, controls, declare, defaultchecked, defaultselected, defer, disabled, draggable, ended, formnovalidate, hidden, indeterminate, iscontenteditable, ismap, itemscope, loop, multiple, muted, nohref, noresize, noshade, novalidate, nowrap, open, paused, pubdate, readonly, required, reversed, scoped, seamless, seeking, selected, spellcheck, truespeed, willvalidate
+
+> Finally, the following commonly mis-capitalized attribute/property names are evaluated as expected:
+
+> 最后，按照预期评估以下常见的大写错误的属性/属性名称：
+
+* class
+* readonly
+
+``` html
+<div id="foo" class="bar"></div>
+```
+``` js
+var foo = element(by.id('foo'));
+expect(foo.getAttribute('class')).toEqual('bar');
+```
+
+##### getText
+
+> Get the visible innerText of this element, including sub-elements, without any leading or trailing whitespace. Visible elements are not hidden by CSS.
+
+> 获取该元素的可见 innerText（包括子元素），不带任何前导或尾随空格。 可见元素不被CSS隐藏。
+
+
+##### getSize
+
+> Schedules a command to compute the size of this element's bounding box, in pixels.
+
+> 执行一个命令来计算此元素边界框的大小（以像素为单位）。
+
+``` html
+<div id="foo" style="width:50px; height: 20px">
+  Inner text
+</div>
+```
+``` js
+var foo = element(by.id('foo'));
+expect(foo.getSize()).toEqual(jasmine.objectContaining({
+ width: 50,
+ height: 20
+});
+```
+
+##### getLocation
+
+> Schedules a command to compute the location of this element in page space.
+
+> 执行一个命令来计算页面空间中该元素的位置。
+
+``` html
+<div id="foo" style="position: absolute; top:20px; left: 15px">
+  Inner text
+</div>
+```
+``` js
+var foo = element(by.id('foo'));
+expect(foo.getLocation()).toEqual(jasmine.objectContaining({
+ x: 15,
+ y: 20
+});
+```
+
+##### isEnabled
+
+> Schedules a command to query whether the DOM element represented by this instance is enabled, as dicted by the disabled attribute.
+
+> 执行一个命令，以查询由此实例表示的DOM元素是否已启用，如禁用的属性所描述的那样。
+
+``` html
+<input id="foo" disabled=true>
+```
+``` js
+var foo = element(by.id('foo'));
+expect(foo.isEnabled()).toBe(false);
+```
+
+##### isSelected
+
+> Schedules a command to query whether this element is selected.
+
+> 执行一个命令来查询是否选择了这个元素。
+
+``` html
+<input id="foo" type="checkbox">
+```
+``` js
+var foo = element(by.id('foo'));
+expect(foo.isSelected()).toBe(false);
+foo.click();
+expect(foo.isSelected()).toBe(true);
+```
+
+##### submit
+
+> Schedules a command to submit the form containing this element (or this element if it is a FORM element). This command is a no-op if the element is not contained in a form.
+
+> 执行一个命令，提交包含此元素的表单（如果是FORM元素，则为该元素）。 如果该元素不包含在表单中，则该命令是无操作的。
+
+``` html
+<form id="login">
+  <input name="user">
+</form>
+```
+``` js
+var login_form = element(by.id('login'));
+login_form.submit();
+```
+
+##### clear
+
+> Schedules a command to clear the value of this element. This command has no effect if the underlying DOM element is neither a text INPUT element nor a TEXTAREA element.
+
+> 执行一个命令来清除这个元素的值。 如果底层DOM元素既不是文本INPUT元素，也不是TEXTAREA元素，则此命令不起作用。
+
+``` html
+<input id="foo" value="Default Text">
+```
+``` js
+var foo = element(by.id('foo'));
+expect(foo.getAttribute('value')).toEqual('Default Text');
+foo.clear();
+expect(foo.getAttribute('value')).toEqual('');
+```
+
+##### isDisplayed
+
+> Schedules a command to test whether this element is currently displayed.
+
+> 执行一个命令来测试当前是否显示这个元素。
+
+``` html
+<div id="foo" style="visibility:hidden">
+```
+``` js
+var foo = element(by.id('foo'));
+expect(foo.isDisplayed()).toBe(false);
+```
+
+##### takeScreenshot
+
+> Take a screenshot of the visible region encompassed by this element's bounding rectangle.
+
+> 截取该元素的边界矩形所包含的可见区域的截图。
+
+``` html
+<div id="foo">Inner Text</div>
+```
+``` js
+function writeScreenShot(data, filename) {
+  var stream = fs.createWriteStream(filename);
+  stream.write(new Buffer(data, 'base64'));
+  stream.end();
+}
+var foo = element(by.id('foo'));
+foo.takeScreenshot().then((png) => {
+  writeScreenShot(png, 'foo.png');
+});
+```
+Note that this is a new feature in WebDriver and may not be supported by your browser's driver. It isn't yet supported in Chromedriver as of 2.21.
+
+请注意，这是WebDriver中的一项新功能，可能不受支持你的浏览器的驱动程序。从2.21开始，Chromedriver还不支持它。
+
+### ExpectedConditions(protractor.ExpectedConditions)
+
+> Represents a library of canned expected conditions that are useful for protractor, especially when dealing with non-angular apps.
+
+> 表示一个对 protractor 有用的预期条件库，尤其是在处理非 angular 应用程序时。
+
+> Each condition returns a function that evaluates to a promise. You may mix multiple conditions using and, or, and/or not. You may also mix these conditions with any other conditions that you write.
+
+> 每个条件返回一个函数，评估为一个 promise。 您可以使用 and, or, and/or not 混合多个条件。 您也可以将这些条件与您编写的任何其他条件混合使用。
+
+``` js
+var EC = protractor.ExpectedConditions;
+var button = $('#xyz');
+var isClickable = EC.elementToBeClickable(button);
+browser.get(URL);
+browser.wait(isClickable, 5000); //wait for an element to become clickable
+button.click();
+// You can define your own expected condition, which is a function that
+// takes no parameter and evaluates to a promise of a boolean.
+var urlChanged = function() {
+  return browser.getCurrentUrl().then(function(url) {
+    return url === 'http://www.angularjs.org';
+  });
+};
+// You can customize the conditions with EC.and, EC.or, and EC.not.
+// Here's a condition to wait for url to change, $('abc') element to contain
+// text 'bar', and button becomes clickable.
+var condition = EC.and(urlChanged, EC.textToBePresentInElement($('abc'), 'bar'), isClickable);
+browser.get(URL);
+browser.wait(condition, 5000); //wait for condition to be true.
+button.click();
+```
+
+#### not
+
+> Negates the result of a promise.
+
+> 否定 promise 的结果。
+
+``` js
+var EC = protractor.ExpectedConditions;
+var titleIsNotFoo = EC.not(EC.titleIs('Foo'));
+// Waits for title to become something besides 'foo'.
+browser.wait(titleIsNotFoo, 5000);
+```
+
+#### and
+
+> Chain a number of expected conditions using logical_and, short circuiting at the first expected condition that evaluates to false.
+
+> 使用logical_and链接许多期望条件，并在第一个期望条件评估结果为false下中断。
+
+``` js
+var EC = protractor.ExpectedConditions;
+var titleContainsFoo = EC.titleContains('Foo');
+var titleIsNotFooBar = EC.not(EC.titleIs('FooBar'));
+// Waits for title to contain 'Foo', but is not 'FooBar'
+browser.wait(EC.and(titleContainsFoo, titleIsNotFooBar), 5000);
+```
+
+#### or
+
+> Chain a number of expected conditions using logical_or, short circuiting at the first expected condition that evaluates to true.
+
+> 使用logical_or链接许多期望条件，在第一个期望条件评估为真下中断。
+
+``` js
+var EC = protractor.ExpectedConditions;
+var titleContainsFoo = EC.titleContains('Foo');
+var titleContainsBar = EC.titleContains('Bar');
+// Waits for title to contain either 'Foo' or 'Bar'
+browser.wait(EC.or(titleContainsFoo, titleContainsBar), 5000);
+```
+
+#### alertIsPresent
+
+> Expect an alert to be present.
+
+> 期望将出现一个 alert 。
+
+``` js
+
+var EC = protractor.ExpectedConditions;
+// Waits for an alert pops up.
+browser.wait(EC.alertIsPresent(), 5000);
+```
+
+#### elementToBeClickable
+
+> An Expectation for checking an element is visible and enabled such that you can click it.
+
+> 期望检查一个元素是可见的，并启用，使您可以点击它。
+
+``` js
+var EC = protractor.ExpectedConditions;
+// Waits for the element with id 'abc' to be clickable.
+browser.wait(EC.elementToBeClickable($('#abc')), 5000);
+```
+
+#### textToBePresentInElement
+
+> NAn expectation for checking if the given text is present in the element. Returns false if the elementFinder does not find an element.
+
+> 期望检查给定文本是否存在于元素中。如果元素查找器找不到元素，则返回false。
+
+``` js
+var EC = protractor.ExpectedConditions;
+// Waits for the element with id 'abc' to contain the text 'foo'.
+browser.wait(EC.textToBePresentInElement($('#abc'), 'foo'), 5000)；
+```
+
+#### textToBePresentInElementValue
+
+> An expectation for checking if the given text is present in the element’s value. Returns false if the elementFinder does not find an element.
+
+> 期望检查给定的文本是否存在于元素的值中。如果元素查找器找不到元素，则返回false。
+
+``` js
+var EC = protractor.ExpectedConditions;
+// Waits for the element with id 'myInput' to contain the input 'foo'.
+browser.wait(EC.textToBePresentInElementValue($('#myInput'), 'foo'), 5000);
+```
+
+#### titleContains
+
+> An expectation for checking that the title contains a case-sensitive substring.
+
+> 期望检查标题是否包含区分大小写的子字符串。
+
+``` js
+var EC = protractor.ExpectedConditions;
+// Waits for the title to contain 'foo'.
+brow
+```
+
+#### titleIs
+
+> An expectation for checking the title of a page.
+
+> 期望检查页面的标题。
+
+``` js
+var EC = protractor.ExpectedConditions;
+// Waits for the title to be 'foo'.
+browser.wait(EC.titleIs('foo'), 5000);
+```
+
+#### urlContains
+
+> An expectation for checking that the URL contains a case-sensitive substring.
+
+> 期望检查URL是否包含区分大小写的子字符串。
+
+``` js
+var EC = protractor.ExpectedConditions;
+// Waits for the URL to contain 'foo'.
+browser.wait(EC.urlContains('foo'), 5000);
+```
+
+#### urlIs
+
+> An expectation for checking the URL of a page.
+
+> 期望检查页面的URL。
+
+``` js
+var EC = protractor.ExpectedConditions;
+// Waits for the URL to be 'foo'.
+browser.wait(EC.urlIs('foo'), 5000);
+```
+
+#### presenceOf
+
+> An expectation for checking that an element is present on the DOM of a page. This does not necessarily mean that the element is visible. This is the opposite of 'stalenessOf'.
+
+> 期望检查页面的DOM上是否存在元素。 这并不一定意味着该元素是可见的。 这是'stalenessOf'的反面。
+
+``` js
+var EC = protractor.ExpectedConditions;
+// Waits for the element with id 'abc' to be present on the dom.
+browser.wait(EC.presenceOf($('#abc')), 5000);
+```
+
+#### stalenessOf
+
+> An expectation for checking that an element is not attached to the DOM of a page. This is the opposite of 'presenceOf'.
+
+> 期望检查一个元素没有附加到页面的DOM。 这是“presenceOf”的反面。
+
+``` js
+var EC = protractor.ExpectedConditions;
+// Waits for the element with id 'abc' to be no longer present on the dom.
+browser.wait(EC.stalenessOf($('#abc')), 5000);
+```
+
+#### visibilityOf
+
+> An expectation for checking that an element is present on the DOM of a page and visible. Visibility means that the element is not only displayed but also has a height and width that is greater than 0. This is the opposite of 'invisibilityOf'.
+
+> 希望检查页面的DOM中是否存在元素并且可见。 可见性意味着元素不仅被显示，而且具有大于0的高度和宽度。这与“invisibilityOf”相反。
+
+``` js
+var EC = protractor.ExpectedConditions;
+// Waits for the element with id 'abc' to be visible on the dom.
+browser.wait(EC.visibilityOf($('#abc')), 5000);
+```
+
+#### invisibilityOf
+
+> An expectation for checking that an element is either invisible or not present on the DOM. This is the opposite of 'visibilityOf'.
+
+> 期望检查元素在DOM上是不可见还是不存在。 这与'visibilityOf'相反。
+
+``` js
+var EC = protractor.ExpectedConditions;
+// Waits for the element with id 'abc' to be no longer visible on the dom.
+browser.wait(EC.invisibilityOf($('#abc')), 5000);
+```
+
+#### elementToBeSelected
+
+> An expectation for checking the selection is selected.
+
+> 期望检查选项被选择。
+
+``` js
+var EC = protractor.ExpectedConditions;
+// Waits for the element with id 'myCheckbox' to be selected.
+browser.wait(EC.elementToBeSelected($('#myCheckbox')), 5000);
+```
+
+参考：[protractor API](http://www.protractortest.org/#/api)
